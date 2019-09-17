@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 #include "dictionary.h"
 
 bool check_word(const char* word, hashmap_t hashtable[])
@@ -43,7 +44,50 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	fclose(file);
 }
 
+// additional method to remove punctuation from a word
+void remove_punctuation(char* p)
+{
+    char* src = p;
+	char* dst = p;
+
+    while (*src)
+    {
+       if (ispunct((unsigned char)*src))
+       {
+          src++;
+       }
+       else if (src == dst)
+       {
+          src++;
+          dst++;
+       }
+       else
+       {
+          *dst++ = *src++;
+       }
+    }
+
+    *dst = 0;
+}
+
 int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
 {
-	
+	int num_misspelled = 0;
+	char* line[MAX_SIZE];
+	while(fgets(line, MAX_SIZE, fp) != NULL)
+	{
+		char* split_line = strtok(line, " ");
+		int misspelled_index = 0;
+		for(auto word : split_line)
+		{
+			word = remove_punctuation(word);
+			if(!check_word(word))
+			{
+				misspelled[misspelled_index] = word;
+				misspelled_index = misspelled_index + 1;
+				num_misspelled = num_misspelled + 1;
+			}
+		}
+	}
+	return num_misspelled;
 }
