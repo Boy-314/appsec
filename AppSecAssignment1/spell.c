@@ -8,16 +8,23 @@ bool check_word(const char* word, hashmap_t hashtable[])
 {
 	int bucket = hash_function(word);
 	hashmap_t cursor = hashtable[bucket];
+	
+	// lower_case = lower_case(word)
+	const int length = strlen(word);
+	char* lower_case = (char*)malloc(length + 1);
+	lower_case[length] = 0;
+	
+	while(cursor != NULL)
+	{		
+		for(int i = 0; i < length; i++) {lower_case[i] = tolower(word[i]);}
+		if(word == cursor->word){return 1;}
+		cursor = cursor->next;
+	}
+	bucket = hash_function(word);
+	cursor = hashmap[bucket];
 	while(cursor != NULL)
 	{
-		// char* lower_case = lower_case(word)
-		const int length = strlen(word);
-		char* lower_case = (char*)malloc(length + 1);
-		lower_case[length] = 0;
-		
-		for(int i = 0; i < length; i++) {lower_case[i] = tolower(word[i]);}
-		if(word == cursor->word) {return 1;}
-		else if(lower_case == cursor->word) {return 1;}
+		if(lower_case == cursor->word) {return 1;}
 		cursor = cursor->next;
 	}
 	return 0;
@@ -34,8 +41,8 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	{
 		hashmap_t new_node;
 		new_node->next = NULL;
-		strcpy(new_node->word, word);
 		// new_node->word = word;
+		strcpy(new_node->word, word);
 		int bucket = hash_function(word);
 		if(hashtable[bucket] == NULL) {hashtable[bucket] = new_node;}
 		else
