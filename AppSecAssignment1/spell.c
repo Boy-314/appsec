@@ -32,8 +32,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
 bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 {
-	// TODO: fix for loop
-	for(auto i : hashtable[]) {i = NULL;}
+	for(int i = 0; i < sizeof(hashtable)/sizeof(hashtable[0]); i++) {hashtable[i] = NULL;}
 	FILE* dict_file = fopen(dictionary_file,"r");
 	if(dict_file == NULL) {return 0;}
 	char word[LENGTH];
@@ -83,16 +82,16 @@ int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
 	{
 		char* split_line = strtok(line, " ");
 		int misspelled_index = 0;
-		// TODO: fix for loop
-		for(auto word : split_line)
+		while(split_line != NULL)
 		{
-			word = remove_punctuation(word);
-			if(!check_word(word, hashtable))
+			split_line = remove_punctuation(split_line);
+			if(!check_word(split_line, hashtable))
 			{
-				misspelled[misspelled_index] = word;
+				misspelled[misspelled_index] = split_line;
 				misspelled_index = misspelled_index + 1;
 				num_misspelled = num_misspelled + 1;
 			}
+			split_line = strtok(NULL, " ");
 		}
 	}
 	return num_misspelled;
