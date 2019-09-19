@@ -21,7 +21,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 		cursor = cursor->next;
 	}
 	bucket = hash_function(word);
-	cursor = hashmap[bucket];
+	cursor = hashtable[bucket];
 	while(cursor != NULL)
 	{
 		if(lower_case == cursor->word) {return 1;}
@@ -84,7 +84,7 @@ int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
 		int misspelled_index = 0;
 		while(split_line != NULL)
 		{
-			split_line = remove_punctuation(split_line);
+			remove_punctuation(split_line);
 			if(!check_word(split_line, hashtable))
 			{
 				misspelled[misspelled_index] = split_line;
