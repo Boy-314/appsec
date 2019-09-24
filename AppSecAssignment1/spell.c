@@ -8,14 +8,14 @@ bool check_word(const char* word, hashmap_t hashtable[])
 {
 	int bucket = hash_function(word);
 	hashmap_t cursor = hashtable[bucket];
-	
+
 	// lower_case = lower_case(word)
 	const int length = strlen(word);
 	char* lower_case = (char*)malloc(length + 1);
 	lower_case[length] = 0;
-	
+
 	while(cursor != NULL)
-	{		
+	{
 		for(int i = 0; i < length; i++) {lower_case[i] = tolower(word[i]);}
 		if(word == cursor->word){return 1;}
 		cursor = cursor->next;
@@ -27,6 +27,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 		if(lower_case == cursor->word) {return 1;}
 		cursor = cursor->next;
 	}
+	free(lower_case);
 	return 0;
 }
 
@@ -34,7 +35,11 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 {
 	for(int i = 0; i < sizeof(hashtable)/sizeof(hashtable[0]); i++) {hashtable[i] = NULL;}
 	FILE* dict_file = fopen(dictionary_file,"r");
-	if(dict_file == NULL) {return 0;}
+	if(dict_file == NULL)
+	{
+		fclose(dict_file);
+		return 0;
+	}
 	char word[LENGTH];
 	while(fgets(word, LENGTH, dict_file) != NULL)
 	{
@@ -57,7 +62,7 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 // additional method to remove punctuation from a word
 void remove_punctuation(char* p)
 {
-    char* src = p;
+  char* src = p;
 	char* dst = p;
 
     while (*src)

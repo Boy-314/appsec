@@ -21,11 +21,10 @@ test: dictionary.o spell.o test_main.o
 	./test_main
 
 prog: dictionary.o spell.o main.o
-	gcc -Wall -o spell_check dictionary.o spell.o main.o
+	gcc -Wall -o spell_check dictionary.o spell.o main.o -g
 
 clean:
 	rm dictionary.o spell.o main.o test_main.o check_spell.o
 
 cleanall:clean
 	rm spell_check
-	
