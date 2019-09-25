@@ -14,7 +14,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	char* lower_case = (char*)malloc(length + 1);
 	lower_case[length] = 0;
 
-	while(cursor != NULL)
+	while(cursor != NULL && cursor->next != NULL)
 	{
 		for(int i = 0; i < length; i++) {lower_case[i] = tolower(word[i]);}
 		if(word == cursor->word){return 1;}
@@ -33,7 +33,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
 bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 {
-	for(int i = 0; i < sizeof(hashtable)/sizeof(hashtable[0]); i++) {hashtable[i] = NULL;}
+	for(int i = 0; i < HASH_SIZE; i++) {hashtable[i] = NULL;}
 	FILE* dict_file = fopen(dictionary_file,"r");
 	if(dict_file == NULL)
 	{
@@ -43,7 +43,8 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	char word[LENGTH];
 	while(fgets(word, LENGTH, dict_file) != NULL)
 	{
-		hashmap_t new_node;
+		node temp = {"",NULL};
+		hashmap_t new_node = &temp;
 		new_node->next = NULL;
 		// new_node->word = word;
 		strcpy(new_node->word, word);
@@ -83,7 +84,9 @@ int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
 {
 	int num_misspelled = 0;
 	char* line;
-	while(fgets(line, HASH_SIZE, fp) != NULL)
+	size_t max_length = HASH_SIZE;
+	//while(fgets(line, HASH_SIZE, fp) != NULL)
+	while(getline(&line, &max_length, fp) != -1)
 	{
 		char* split_line = strtok(line, " ");
 		int misspelled_index = 0;
