@@ -20,9 +20,10 @@ int main(int argc, char* argv[])
 		// load words into hashmap
 		if(load_dictionary(dictionary_file, hashtable))
 		{
+			//printf("dictionary_file: %s\n", dictionary_file);
 			FILE* fp = fopen(input_file,"r");
 			int count_misspelled = check_words(fp, hashtable, mispelled);
-			printf("%d",count_misspelled);
+			printf("%d\n",count_misspelled);
 			fclose(fp);
 		}
 	}
