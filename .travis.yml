@@ -1,3 +1,2 @@
 language: C
-install: make get-deps
 compiler: gcc
