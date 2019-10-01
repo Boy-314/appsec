@@ -20,11 +20,12 @@ int main(int argc, char** argv) {
     }
     char read_mode[2] = "r";
     FILE* fp = fopen(argv[1], read_mode);
-    char * dictionary = argv[2]; 
+    char * dictionary = argv[2];
     load_dictionary(dictionary, hashtable);
     char* misspelled[MAX_MISSPELLED];
     int num_wrong = check_words(fp, hashtable, misspelled);
     for (int i = 0; i < num_wrong; i++) {
+        //printf("i: %d\n", i);
         printf("%s\n", misspelled[i]);
     }
 }
