@@ -4,11 +4,28 @@
 #include <string.h>
 #include "dictionary.h"
 
+// helper method to determine whether or not an input is a number or not
+// returns 1 if it is a number, 0 otherwise
+bool isnumber(const char* word)
+{
+	for (int i = 0; i < strlen(word); i++)
+	{
+		if (!isdigit(word[i]))
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
 bool check_word(const char* word, hashmap_t hashtable[])
 {
 	int bucket = hash_function(word);
 	hashmap_t cursor = hashtable[bucket];
 	//printf("word: %s\ncheck_word bucket: %d\n", word, bucket);
+
+	// if the word is a number, return 1
+	if(isnumber(word)) {return 1;}
 
 	// lower_case = lower_case(word)
 	const int length = strlen(word);
