@@ -38,7 +38,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 		//printf("\nword: %s\ncursor->word: %s\ncheck_word bucket: %d\n", word, cursor->word, bucket);
 		if(!strcmp(word, cursor->word))
 		{
-			//printf("\nfound match: %s\n\n", word);
+			printf("found match: %s\n", word);
 			free(lower_case);
 			return 1;
 		}
@@ -51,7 +51,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	{
 		if(!strcmp(lower_case, cursor->word))
 		{
-			//printf("\nfound lower_case match: %s\n\n", lower_case);
+			printf("found lower_case match: %s\n", lower_case);
 			free(lower_case);
 			return 1;
 		}
@@ -66,6 +66,7 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 {
 	for(int i = 0; i < HASH_SIZE; i++) {hashtable[i] = NULL;}
 	FILE* dict_file = fopen(dictionary_file,"r");
+	hashmap_t new_node;
 	if(dict_file == NULL)
 	{
 		fclose(dict_file);
@@ -74,10 +75,19 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	char word[LENGTH];
 	while(fgets(word, LENGTH, dict_file) != NULL)
 	{
-		// remove potential end line character
+		// remove potential whitespace character
+		word[strcspn(word, " ")] = 0;
+		word[strcspn(word, "\t")] = 0;
 		word[strcspn(word, "\n")] = 0;
+		word[strcspn(word, "\v")] = 0;
+		word[strcspn(word, "\f")] = 0;
 		word[strcspn(word, "\r")] = 0;
-		hashmap_t new_node = malloc(sizeof(struct node));
+
+		// remove quotation marks
+		word[strcspn(word, "“")] = 0;
+		word[strcspn(word, "”")] = 0;
+
+		new_node = malloc(sizeof(struct node));
 		new_node->next = NULL;
 		// new_node->word = word;
 		strcpy(new_node->word, word);
@@ -91,6 +101,7 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	}
 	fclose(dict_file);
 	return 1;
+	free(new_node);
 }
 
 // additional method to remove punctuation from a word
@@ -101,7 +112,7 @@ void remove_punctuation(char* p)
 
     while (*src)
     {
-       if (ispunct((unsigned char)*src)) {src++;}
+       if (ispunct((unsigned char)*src) && !strstr(src,"'")) {src++;}
        else if (src == dst)
        {
           src++;
@@ -115,29 +126,50 @@ void remove_punctuation(char* p)
 
 int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
 {
+	int misspelled_index = 0;
 	int num_misspelled = 0;
 	char* line = malloc(HASH_SIZE);
 	size_t max_length = HASH_SIZE;
 	while(getline(&line, &max_length, fp) != -1)
 	{
-		char* split_line = strtok(line, " ");
-		int misspelled_index = 0;
+		// todo: free line_copy
+		char* line_copy = strdup(line);
+		char* split_line = strtok(line_copy, " ");
 		while(split_line != NULL)
 		{
+
 			remove_punctuation(split_line);
-			// remove potential end-line character
+
+			// remove potential whitespace character
+			split_line[strcspn(split_line, " ")] = 0;
+			split_line[strcspn(split_line, "\t")] = 0;
 			split_line[strcspn(split_line, "\n")] = 0;
+			split_line[strcspn(split_line, "\v")] = 0;
+			split_line[strcspn(split_line, "\f")] = 0;
 			split_line[strcspn(split_line, "\r")] = 0;
-			if(!check_word(split_line, hashtable))
+
+			// remove directional quotation marks
+			split_line[strcspn(split_line, "“")] = 0;
+			split_line[strcspn(split_line, "”")] = 0;
+
+			if(check_word(split_line, hashtable) == 0)
 			{
 				misspelled[misspelled_index] = split_line;
-				//printf("mispelled word: %s\narray index: %d\nmisspelled[misspelled_index]: %s\n", split_line, misspelled_index, misspelled[misspelled_index]);
 				misspelled_index = misspelled_index + 1;
 				num_misspelled = num_misspelled + 1;
 			}
+
 			split_line = strtok(NULL, " ");
+
+			printf("misspelled: ");
+			for (int i = 0; i < misspelled_index; i++) {
+				printf("%s, ", misspelled[i]);
+			}
+			printf("\n");
+
+			//free(line_copy);
 		}
 	}
-	//free(line);
 	return num_misspelled;
+	free(line);
 }

@@ -28,4 +28,5 @@ int main(int argc, char** argv) {
         //printf("i: %d\n", i);
         printf("%s\n", misspelled[i]);
     }
+    //fclose(fp); // additional line
 }
