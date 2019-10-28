@@ -1,6 +1,6 @@
 Command line used to find this crash:
 
-afl-fuzz -i fuzz_input -o fuzz_output -- ./spell_check @@ wordlist.txt
+afl-fuzz -i fuzz_input -o fuzz_output -- ./spell_check @@ test_wordlist.txt
 
 If you can't reproduce a bug outside of afl-fuzz, be sure to set the same
 memory limit. The limit used for this fuzzing session was 50.0 MB.

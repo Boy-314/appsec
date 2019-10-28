@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+  <form method = "POST" action = "">
+    {{ form.hidden_tag() }}
+    {{ form.username.label(class="form-control-label") }}
+    {% if form.username.errors %}
+      {{ form.username(class="form-control form-control-lg is-invalid") }}
+      <div class="invalid-feedback">
+        {% for errors in form.username.errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      {{ form.username(class="form-control form-control-lg") }}
+    {% endif %}
+
+    {{ form.password.label(class="form-control-label") }}
+    {% if form.password.errors %}
+      {{ form.password(class="form-control form-control-lg is-invalid") }}
+      <div class="invalid-feedback">
+        {% for errors in form.password.errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      {{ form.password(class="form-control form-control-lg") }}
+    {% endif %}
+
+    {{ form.confirm_password.label(class="form-control-label") }}
+    {% if form.confirm_password.errors %}
+      {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
+      <div class="invalid-feedback">
+        {% for errors in form.confirm_password.errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      {{ form.confirm_password(class="form-control form-control-lg") }}
+    {% endif %}
+
+    {{ form.two_factor.label(class="form-control-label") }}
+    {% if form.two_factor.errors %}
+      {{ form.two_factor(class="form-control form-control-lg is-invalid") }}
+      <div class="invalid-feedback">
+        {% for errors in form.two_factor.errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      {{ form.two_factor(class="form-control form-control-lg") }}
+    {% endif %}
+
+    {{ form.register(class="btn btn-outline-info") }}
+  </form>
+{% endblock content %}

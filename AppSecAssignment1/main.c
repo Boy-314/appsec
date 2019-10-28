@@ -25,8 +25,6 @@ int main(int argc, char** argv) {
     char* misspelled[MAX_MISSPELLED];
     int num_wrong = check_words(fp, hashtable, misspelled);
     for (int i = 0; i < num_wrong; i++) {
-        //printf("i: %d\n", i);
         printf("%s\n", misspelled[i]);
     }
-    //fclose(fp); // additional line
 }

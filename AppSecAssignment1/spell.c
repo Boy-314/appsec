@@ -6,16 +6,18 @@
 
 // helper method to determine whether or not an input is a number or not
 // returns 1 if it is a number, 0 otherwise
-bool isnumber(const char* word)
+bool is_number(const char* word)
 {
-	for (int i = 0; i < strlen(word); i++)
-	{
-		if (!isdigit(word[i]))
-		{
-			return 0;
-		}
-	}
+	for (int i = 0; i < strlen(word); i++) {if (!isdigit(word[i])) {return 0;}}
 	return 1;
+}
+
+// helper method to detect if a word has non-ascii characters
+// returns 1 if there is a non-ascii charecter, 0 otherwise
+bool is_ascii(const char* word)
+{
+	for (int i = 0; i < strlen(word); i++) {if (word[i] > 127 || word[i] < 0) {return 1;}}
+	return 0;
 }
 
 bool check_word(const char* word, hashmap_t hashtable[])
@@ -25,7 +27,9 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	//printf("check_word uppercase\nword: %s\nbucket: %d\n", word, bucket);
 
 	// if the word is a number, return 1
-	if(isnumber(word)) {return 1;}
+	if(is_number(word)) {return 1;}
+	// if the word contains non-ascii characters, return 0;
+	if(is_ascii(word)) {return 0;}
 
 	// lower_case = lower_case(word)
 	const int length = strlen(word);
@@ -38,7 +42,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 		//printf("\nword: %s\ncursor->word: %s\ncheck_word bucket: %d\n", word, cursor->word, bucket);
 		if(!strcmp(word, cursor->word))
 		{
-			printf("found match: %s\n", word);
+			//printf("found match: %s\n", word);
 			free(lower_case);
 			return 1;
 		}
@@ -51,13 +55,13 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	{
 		if(!strcmp(lower_case, cursor->word))
 		{
-			printf("found lower_case match: %s\n", lower_case);
+			//printf("found lower_case match: %s\n", lower_case);
 			free(lower_case);
 			return 1;
 		}
 		cursor = cursor->next;
 	}
-	printf("found misspelling: %s\n", lower_case);
+	//printf("found misspelling: %s\n", lower_case);
 	free(lower_case);
 	return 0;
 }
@@ -101,27 +105,17 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	}
 	fclose(dict_file);
 	return 1;
-	free(new_node);
 }
 
-// additional method to remove punctuation from a word
-void remove_punctuation(char* p)
+// method to remove punctuation from the beginning and end of words
+char* remove_punctuation(char* word)
 {
-  char* src = p;
-	char* dst = p;
-
-    while (*src)
-    {
-       if (ispunct((unsigned char)*src) && !strstr(src,"'")) {src++;}
-       else if (src == dst)
-       {
-          src++;
-          dst++;
-       }
-       else {*dst++ = *src++;}
-    }
-
-    *dst = 0;
+	for (; *word && !isalpha(*word); ++word);
+	if (*word == '\0') {return word;}
+	char* end = word + strlen(word);
+	for(; !isalpha(*end); --end);
+	*++end = '\0';
+	return word;
 }
 
 int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
@@ -130,15 +124,16 @@ int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
 	int num_misspelled = 0;
 	char* line = malloc(HASH_SIZE);
 	size_t max_length = HASH_SIZE;
+	char* line_copy;
 	while(getline(&line, &max_length, fp) != -1)
 	{
 		// todo: free line_copy
-		char* line_copy = strdup(line);
+		line_copy = strdup(line);
 		char* split_line = strtok(line_copy, " ");
 		while(split_line != NULL)
 		{
 
-			remove_punctuation(split_line);
+			split_line = remove_punctuation(split_line);
 
 			// remove potential whitespace character
 			split_line[strcspn(split_line, " ")] = 0;
@@ -161,15 +156,13 @@ int check_words(FILE* fp, hashmap_t hashtable[], char* misspelled[])
 
 			split_line = strtok(NULL, " ");
 
-			printf("misspelled: ");
-			for (int i = 0; i < misspelled_index; i++) {
-				printf("%s, ", misspelled[i]);
-			}
-			printf("\n");
+			// printf("misspelled: ");
+			// for (int i = 0; i < misspelled_index; i++) {
+			// 	printf("%s, ", misspelled[i]);
+			// }
+			// printf("\n");
 
-			//free(line_copy);
 		}
 	}
 	return num_misspelled;
-	free(line);
 }
