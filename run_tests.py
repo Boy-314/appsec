@@ -57,8 +57,7 @@ class TestCasesAssignment1(unittest.TestCase):
         testsub = subprocess.Popen(["./a.out", testfile, DICTFILE], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = testsub.stdout.read().decode().strip().split('\n')
         expected = "caoimhín"
-
-
+        
         self.assertTrue(len(output) == 1, msg=f"Test Failed: Incorrect number of misspelled words")
         self.assertEqual(output[0].lower(), expected, msg=f"Test Failed: Incrorrect word in output.")
         testsub.terminate()
@@ -76,8 +75,7 @@ class TestCasesAssignment1(unittest.TestCase):
             self.assertEqual(output[i].lower(), expected[i], msg=failmsg)
             i += 1
         testsub.terminate()
-
-
+    
     #@weight(3)
     def test_word_with_punct(self):
         """checking a word with punctuation in the middle."""
@@ -114,7 +112,7 @@ class TestCasesAssignment1(unittest.TestCase):
     #    testsub = subprocess.Popen(["./a.out", testfile, DICTFILE], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #    output = testsub.stdout.read().decode().strip().split('\n')
     #    self.assertEqual(len(output),1))
-    #    for letter in
+    #    for letter in 
     #    testsub.terminate()
 
     #@weight(5)
