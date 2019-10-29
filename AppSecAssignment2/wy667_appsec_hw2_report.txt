@@ -1,5 +1,7 @@
 wy667 netsec hw2 report
 
+github: https://github.com/Boy-314/appsec/tree/master/AppSecAssignment2
+
 week 5 report:
 In order to prevent attacks, the general idea is to never trust user input. Since the web app we are developing is relatively simple, there are fewer things that can go wrong. Things like SQL Injection cannot occur because we simply do not have any databases. In order to prevent some XSS and CSRF attacks, we have sanitized user input with Flask's built in escape() function. This function is called everytime we read in data in our Python code via request.form["PLACEHOLDER"]. So our desired code is now escape(request.form["PLACEHOLDER"]) Escaping user input also prevents possible session hijacking and code injections, as explained later.
 
