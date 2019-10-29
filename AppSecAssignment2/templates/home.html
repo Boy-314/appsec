@@ -1,6 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
   <h1>wy667 appsec hw2</h1>
+  {% if "username" in session %}
+    logged in as {{ session["username"] }}<br>
+  {% endif %}
   <a href="{{ url_for('login') }}">login</a><br>
-  <a href="{{ url_for('register') }}">register</a>
+  <a href="{{ url_for('register') }}">register</a><br>
+  <a href="{{ url_for('spell_check') }}">spell_check</a><br>
 {% endblock content %}

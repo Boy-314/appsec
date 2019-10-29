@@ -1,0 +1,11 @@
+wy667 netsec hw2 report
+
+week 5 report:
+In order to prevent attacks, the general idea is to never trust user input. Since the web app we are developing is relatively simple, there are fewer things that can go wrong. Things like SQL Injection cannot occur because we simply do not have any databases. In order to prevent some XSS and CSRF attacks, we have sanitized user input with Flask's built in escape() function. This function is called everytime we read in data in our Python code via request.form["PLACEHOLDER"]. So our desired code is now escape(request.form["PLACEHOLDER"]) Escaping user input also prevents possible session hijacking and code injections, as explained later.
+
+Another possible attack arises due to the nature of the web app. Since we want only authorized users to access the spell_check method, we must ensure that only logged in users can reach the page. This has been solved by using Flask's sessions, which acts as a Python dictionary. Once a user logs in, we save an (key, value) pair in the sessions variable as (username, escape(request.form["username"])).
+
+Code injection is only possible once a user is logged in, and then attempts to insert Linux shell commands into the spell_check text box. In order to combat this, we don't directy pass the user input into the shell, but instead save it to a file and run it via a Python subprocess with arguments to the saved file and the wordlist. Since the spell_check only outputs to HTML the misspelled words, we technically only need to escape the output in case the misspelled words contain characters that could potentially be used as an XSS or CSRF attack.
+
+week 6 report:
+Personally, I was unable to find any attacks that worked on my web app. However, this of course does not mean that my web app is perfecty secure. It just means that it meets a certain level of security, and so attackers must be above this certain level in order to successfuly attack my web app.
