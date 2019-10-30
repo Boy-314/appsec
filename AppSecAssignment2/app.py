@@ -14,7 +14,7 @@ registered_users = {}
 def home():
     return render_template("home.html")
 
-@app.route("/your/webroot/register", methods=["POST", "GET"])
+@app.route("/register", methods=["POST", "GET"])
 def register():
     if request.method == "POST":
         username = escape(request.form["username"])
@@ -35,7 +35,7 @@ def register():
             return redirect(url_for("login"))
     return render_template("register.html")
 
-@app.route("/your/webroot/login", methods=["POST", "GET"])
+@app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
         username = escape(request.form["username"])
@@ -58,7 +58,7 @@ def login():
             return render_template("login.html")
     return render_template("login.html")
 
-@app.route("/your/webroot/spell_check", methods=["POST", "GET"])
+@app.route("/spell_check", methods=["POST", "GET"])
 def spell_check():
     if "username" in session:
         username = session["username"]
