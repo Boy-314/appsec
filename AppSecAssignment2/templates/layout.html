@@ -12,15 +12,6 @@
 </head>
 <body>
     <a href="{{ url_for('home') }}">home</a>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class=flashes>
-        {% for message in messages %}
-          <li id="success">{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
     {% block content %}{% endblock %}
 
     <!-- Optional JavaScript -->

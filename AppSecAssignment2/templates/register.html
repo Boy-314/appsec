@@ -1,6 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
   <h1>register</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for message in messages %}
+        <li id="success">{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
   <form action="" method="POST">
     username <input type="text" id="uname" name="username"><br>
     password <input type="password" id="pword" name="password"><br>
