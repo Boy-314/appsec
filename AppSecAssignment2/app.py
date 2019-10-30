@@ -44,7 +44,7 @@ def login():
         if username in registered_users:
             if bcrypt.check_password_hash(registered_users[username][0], password):
                 if twofactor == registered_users[username][1]:
-                    flash(f"login success", "success")
+                    flash("login success")
                     session["username"] = username
                     return redirect(url_for("home"))
                 else:
