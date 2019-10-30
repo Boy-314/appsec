@@ -32,7 +32,7 @@ def register():
             hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
             registered_users[username] = [hashed_password, twofactor]
             flash("success, registration complete")
-            return redirect(url_for("login"))
+            return render_template("register.html")
     return render_template("register.html")
 
 @app.route("/login", methods=["POST", "GET"])
