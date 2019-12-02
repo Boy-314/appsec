@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h4>your spell-check history:</h4><br>
+  <p id=numqueries>total queries: {{ querycount }}</p>
+  {% with qcount = querycount %}
+    {% for i in range(qcount) %}
+      <li id={{ querynums[i] }}>{{ querytexts[i] }}</li>
+    {% endfor %}
+  {% endwith %}
+  <p id="textout">{{ text }}</p>
+{% endblock content %}
