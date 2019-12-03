@@ -21,14 +21,18 @@ spellchecks = Table(
     Column('users_usrnm', None, ForeignKey('users.usrnm')),
     Column('sc_text', String),
 )
-meta.create_all(engine)
-conn = engine.connect()
-conn.execute(users.delete())
-conn.execute(spellchecks.delete())
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(16)
 bcrypt = Bcrypt(app)
+
+meta.create_all(engine)
+conn = engine.connect()
+conn.execute(users.delete())
+conn.execute(spellchecks.delete())
+pword = bcrypt.generate_password_hash("Administrator@1").decode("utf-8")
+insert_admin_account = users.insert().values(usrnm = "admin", psswrd = pword, twfctr = "12345678901")
+conn.execute(insert_admin_account)
 
 registered_users = {}
 
@@ -138,11 +142,14 @@ def spell_check():
     flash("something broke")
     return redirect(url_for("login"))
 
-@app.route("/history")
+@app.route("/history", methods=["POST", "GET"])
 def history():
     if "username" in session:
         username = session["username"]
         flash(f"logged in as {username}")
+        if request.method == "POST":
+            flash("under construction")
+            return redirect(url_for("query"))
         select_queryID = select([spellchecks.c.id]).where(spellchecks.c.users_usrnm == username)
         select_querytext = select([spellchecks.c.sc_text]).where(spellchecks.c.users_usrnm == username)
         select_numqueries = select([func.count()]).where(spellchecks.c.users_usrnm == username)
@@ -161,12 +168,16 @@ def history():
         for row in get_querytexts:
             query_texts.append(row['sc_text'])
             # print("appending query_text")
-        return render_template("history.html", querycount=get_numqueries[0], querynums = query_IDs, querytexts = query_texts)
+        return render_template("history.html", loggedin = username, querycount=get_numqueries[0], querynums = query_IDs, querytexts = query_texts)
     else:
         flash("login to see this page")
         return redirect(url_for("login"))
     flash("something broke")
     return redirect(url_for("login"))
+
+@app.route("/history/<id>")
+def query(id):
+    return render_template("query.html", queryid=id)
 
 if __name__ == "__main__":
     app.run(debug=True)
