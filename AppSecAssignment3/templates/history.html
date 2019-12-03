@@ -6,7 +6,7 @@
       <input type="submit" value="run">
     </form>
   {% endif %}
-  <h4>your spell-check history:</h4><br>
+  <h4>spell-check history:</h4><br>
   <p id=numqueries>total queries: {{ querycount }}</p>
   {% with qcount = querycount %}
     {% for i in range(qcount) %}

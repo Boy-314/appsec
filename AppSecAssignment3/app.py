@@ -34,7 +34,6 @@ conn.execute(spellchecks.delete())
 pword = bcrypt.generate_password_hash("Administrator@1").decode("utf-8")
 insert_admin_account = users.insert().values(usrnm = "admin", psswrd = pword, twfctr = "12345678901")
 conn.execute(insert_admin_account)
-conn.execute(spellchecks.insert().values(users_usrnm="test1", sc_text="test2", sc_output="test3"))
 
 registered_users = {}
 
@@ -195,21 +194,32 @@ def history():
 
 @app.route("/history/<id>")
 def query(id):
-    idnum = id[5:]
-    conn = engine.connect()
-    select_username = select([spellchecks.c.users_usrnm]).where(spellchecks.c.id == idnum)
-    select_querytext = select([spellchecks.c.sc_text]).where(spellchecks.c.id == idnum)
-    select_outputtext = select([spellchecks.c.sc_output]).where(spellchecks.c.id == idnum)
-    query_user_result = conn.execute(select_username)
-    querytext_result = conn.execute(select_querytext)
-    query_outputtext_result = conn.execute(select_outputtext)
-    get_query_user = query_user_result.fetchone()
-    get_querytext = querytext_result.fetchone()
-    get_outputtext = query_outputtext_result.fetchone()
-    query_user = get_query_user["users_usrnm"]
-    query_text = get_querytext["sc_text"]
-    output_text = get_outputtext["sc_output"]
-    return render_template("query.html", queryid=idnum, loggedin=query_user, querytext=query_text, output=output_text)
+    if "username" in session:
+        username = session["username"]
+        idnum = id[5:]
+        conn = engine.connect()
+        select_username = select([spellchecks.c.users_usrnm]).where(spellchecks.c.id == idnum)
+        select_querytext = select([spellchecks.c.sc_text]).where(spellchecks.c.id == idnum)
+        select_outputtext = select([spellchecks.c.sc_output]).where(spellchecks.c.id == idnum)
+        query_user_result = conn.execute(select_username)
+        querytext_result = conn.execute(select_querytext)
+        query_outputtext_result = conn.execute(select_outputtext)
+        get_query_user = query_user_result.fetchone()
+        get_querytext = querytext_result.fetchone()
+        get_outputtext = query_outputtext_result.fetchone()
+        query_user = get_query_user["users_usrnm"]
+        query_text = get_querytext["sc_text"]
+        output_text = get_outputtext["sc_output"]
+        if username == "admin" or query_user == username:
+            return render_template("query.html", queryid=idnum, loggedin=query_user, querytext=query_text, output=output_text)
+        else:
+            flash("you are not authorzed to see this page")
+            return redirect(url_for("login"))
+    else:
+        flash("login to see this page")
+        return redirect(url_for("login"))
+    flash("something broke")
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run(debug=True)
