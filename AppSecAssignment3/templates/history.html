@@ -10,7 +10,7 @@
   <p id=numqueries>total queries: {{ querycount }}</p>
   {% with qcount = querycount %}
     {% for i in range(qcount) %}
-      <li id={{ querynums[i] }}><a href="{{ url_for("query", id=querynums[i])}}">{{ querytexts[i] }}</li>
+      <li id={{ querynums[i] }}><a href="{{ url_for("query", id=querynums[i], loggedin=loggedin)}}">{{ querytexts[i] }}</li>
     {% endfor %}
   {% endwith %}
   <p id="textout">{{ text }}</p>

@@ -20,6 +20,7 @@ spellchecks = Table(
     Column('id', Integer, primary_key = True),
     Column('users_usrnm', None, ForeignKey('users.usrnm')),
     Column('sc_text', String),
+    Column('sc_output', String),
 )
 
 app = Flask(__name__)
@@ -33,6 +34,7 @@ conn.execute(spellchecks.delete())
 pword = bcrypt.generate_password_hash("Administrator@1").decode("utf-8")
 insert_admin_account = users.insert().values(usrnm = "admin", psswrd = pword, twfctr = "12345678901")
 conn.execute(insert_admin_account)
+conn.execute(spellchecks.insert().values(users_usrnm="test1", sc_text="test2", sc_output="test3"))
 
 registered_users = {}
 
@@ -131,7 +133,7 @@ def spell_check():
             output_file = open("misspelled.txt","r")
             misspelled = output_file.read()
             output_file.close()
-            ins = spellchecks.insert().values(users_usrnm=username, sc_text=text)
+            ins = spellchecks.insert().values(users_usrnm=username, sc_text=text, sc_output=misspelled)
             conn = engine.connect()
             result = conn.execute(ins)
             return render_template("misspelled.html", text=text, misspelled=misspelled)
@@ -147,28 +149,44 @@ def history():
     if "username" in session:
         username = session["username"]
         flash(f"logged in as {username}")
-        if request.method == "POST":
-            flash("under construction")
-            return redirect(url_for("query"))
         select_queryID = select([spellchecks.c.id]).where(spellchecks.c.users_usrnm == username)
         select_querytext = select([spellchecks.c.sc_text]).where(spellchecks.c.users_usrnm == username)
         select_numqueries = select([func.count()]).where(spellchecks.c.users_usrnm == username)
         conn = engine.connect()
-        select_queryID_result = conn.execute(select_queryID)
-        select_querytext_result = conn.execute(select_querytext)
-        select_numqueries_result = conn.execute(select_numqueries)
-        get_queryIDs = select_queryID_result.fetchall()
-        get_querytexts = select_querytext_result.fetchall()
-        get_numqueries = select_numqueries_result.fetchone()
         query_IDs = []
         query_texts = []
-        for row in get_queryIDs:
-            query_IDs.append("query"+str(row['id']))
-            # print("appending query_id")
-        for row in get_querytexts:
-            query_texts.append(row['sc_text'])
-            # print("appending query_text")
-        return render_template("history.html", loggedin = username, querycount=get_numqueries[0], querynums = query_IDs, querytexts = query_texts)
+        if request.method == "POST":
+            adminrequest_user = escape(request.form["userquery"])
+            select_queryID = select([spellchecks.c.id]).where(spellchecks.c.users_usrnm == adminrequest_user)
+            select_querytext = select([spellchecks.c.sc_text]).where(spellchecks.c.users_usrnm == adminrequest_user)
+            select_numqueries = select([func.count()]).where(spellchecks.c.users_usrnm == adminrequest_user)
+            select_queryID_result = conn.execute(select_queryID)
+            select_querytext_result = conn.execute(select_querytext)
+            select_numqueries_result = conn.execute(select_numqueries)
+            get_queryIDs = select_queryID_result.fetchall()
+            get_querytexts = select_querytext_result.fetchall()
+            get_numqueries = select_numqueries_result.fetchone()
+            for row in get_queryIDs:
+                query_IDs.append("query"+str(row['id']))
+                # print("appending query_id")
+            for row in get_querytexts:
+                query_texts.append(row['sc_text'])
+                # print("appending query_text")
+            return render_template("history.html", loggedin = adminrequest_user, querycount=get_numqueries[0], querynums = query_IDs, querytexts = query_texts)
+        else:
+            select_queryID_result = conn.execute(select_queryID)
+            select_querytext_result = conn.execute(select_querytext)
+            select_numqueries_result = conn.execute(select_numqueries)
+            get_queryIDs = select_queryID_result.fetchall()
+            get_querytexts = select_querytext_result.fetchall()
+            get_numqueries = select_numqueries_result.fetchone()
+            for row in get_queryIDs:
+                query_IDs.append("query"+str(row['id']))
+                # print("appending query_id")
+            for row in get_querytexts:
+                query_texts.append(row['sc_text'])
+                # print("appending query_text")
+            return render_template("history.html", loggedin = username, querycount=get_numqueries[0], querynums = query_IDs, querytexts = query_texts)
     else:
         flash("login to see this page")
         return redirect(url_for("login"))
@@ -177,7 +195,21 @@ def history():
 
 @app.route("/history/<id>")
 def query(id):
-    return render_template("query.html", queryid=id)
+    idnum = id[5:]
+    conn = engine.connect()
+    select_username = select([spellchecks.c.users_usrnm]).where(spellchecks.c.id == idnum)
+    select_querytext = select([spellchecks.c.sc_text]).where(spellchecks.c.id == idnum)
+    select_outputtext = select([spellchecks.c.sc_output]).where(spellchecks.c.id == idnum)
+    query_user_result = conn.execute(select_username)
+    querytext_result = conn.execute(select_querytext)
+    query_outputtext_result = conn.execute(select_outputtext)
+    get_query_user = query_user_result.fetchone()
+    get_querytext = querytext_result.fetchone()
+    get_outputtext = query_outputtext_result.fetchone()
+    query_user = get_query_user["users_usrnm"]
+    query_text = get_querytext["sc_text"]
+    output_text = get_outputtext["sc_output"]
+    return render_template("query.html", queryid=idnum, loggedin=query_user, querytext=query_text, output=output_text)
 
 if __name__ == "__main__":
     app.run(debug=True)
