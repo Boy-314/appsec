@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h4>logs</h4>
+  {% with logcount = userlogs %}
+    {% for i in range(logcount) %}
+      <li id=login{{ logIDnums[i] }}><span id=login{{ logIDnums[i] }}_time>login time: {{ logintimes[i] }}</span>, <span id=logout{{ logIDnums[i] }}_time>logout time: {{ logouttimes[i] }}</span></li>
+    {% endfor %}
+  {% endwith %}
+{% endblock content %}

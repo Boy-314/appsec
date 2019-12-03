@@ -1,9 +1,10 @@
 from flask import Flask, render_template, url_for, flash, redirect, request, session, escape
 from flask_bcrypt import Bcrypt
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, UniqueConstraint, ForeignKey, func
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, UniqueConstraint, ForeignKey, func, update
 from sqlalchemy.sql import select
 import os
 import subprocess
+from datetime import datetime
 
 engine = create_engine('sqlite:///backend.db', echo = True)
 meta = MetaData()
@@ -12,8 +13,6 @@ users = Table(
     Column('usrnm', String, unique = True, primary_key = True),
     Column('psswrd', String),
     Column('twfctr', String),
-    Column('logins', String),
-    Column('logouts', String),
 )
 spellchecks = Table(
     'spellchecks', meta,
@@ -21,6 +20,13 @@ spellchecks = Table(
     Column('users_usrnm', None, ForeignKey('users.usrnm')),
     Column('sc_text', String),
     Column('sc_output', String),
+)
+logs = Table(
+    'logs', meta,
+    Column('id', Integer, primary_key = True),
+    Column('users_usrnm', None, ForeignKey('users.usrnm')),
+    Column('login', String),
+    Column('logout', String),
 )
 
 app = Flask(__name__)
@@ -31,11 +37,13 @@ meta.create_all(engine)
 conn = engine.connect()
 conn.execute(users.delete())
 conn.execute(spellchecks.delete())
+conn.execute(logs.delete())
 pword = bcrypt.generate_password_hash("Administrator@1").decode("utf-8")
 insert_admin_account = users.insert().values(usrnm = "admin", psswrd = pword, twfctr = "12345678901")
 conn.execute(insert_admin_account)
 
 registered_users = {}
+log_id = -1
 
 @app.route("/")
 @app.route("/home")
@@ -104,6 +112,11 @@ def login():
                 if twofactor == database_twofactor:
                     flash("login success")
                     session["username"] = username
+                    login_time = datetime.now()
+                    ins = logs.insert().values(users_usrnm=username, login=login_time, logout="N/A")
+                    conn = engine.connect()
+                    result = conn.execute(ins)
+                    log_id = result.inserted_primary_key
                     return redirect(url_for("home"))
                 else:
                     flash("two factor failure")
@@ -134,7 +147,7 @@ def spell_check():
             output_file.close()
             ins = spellchecks.insert().values(users_usrnm=username, sc_text=text, sc_output=misspelled)
             conn = engine.connect()
-            result = conn.execute(ins)
+            conn.execute(ins)
             return render_template("misspelled.html", text=text, misspelled=misspelled)
         return render_template("spell_check.html")
     else:
@@ -213,10 +226,64 @@ def query(id):
         if username == "admin" or query_user == username:
             return render_template("query.html", queryid=idnum, loggedin=query_user, querytext=query_text, output=output_text)
         else:
-            flash("you are not authorzed to see this page")
+            flash("you are not authorized to see this page")
             return redirect(url_for("login"))
     else:
         flash("login to see this page")
+        return redirect(url_for("login"))
+    flash("something broke")
+    return redirect(url_for("login"))
+
+@app.route("/login_history", methods=["POST", "GET"])
+def login_history():
+    if "username" in session:
+        username = session["username"]
+        if username == "admin":
+            if request.method == "POST":
+                requested_user = escape(request.form["loginhistory"])
+                select_all_logs_for_user = select([logs]).where(logs.c.users_usrnm == requested_user)
+                conn = engine.connect()
+                result = conn.execute(select_all_logs_for_user)
+                get_logs = result.fetchall()
+                user_logs = []
+                for row in get_logs:
+                    user_logs.append(row)
+                if len(user_logs) < 1:
+                    flash("user not found")
+                    return redirect(url_for("home"))
+                else:
+                    num_user_logs = len(user_logs)
+                    log_ID_nums = []
+                    login_times = []
+                    logout_times = []
+                    for row in get_logs:
+                        log_ID_nums.append(row['id'])
+                        login_times.append(row['login'])
+                        logout_times.append(row['logout'])
+                    return render_template("showlogs.html", userlogs = num_user_logs, logIDnums = log_ID_nums, logintimes = login_times, logouttimes = logout_times)
+            return render_template("login_history.html")
+        else:
+            flash("you are not authorized to see this page")
+            return redirect(url_for("login"))
+    else:
+        flash("you are not authorized to see this page")
+        return redirect(url_for("login"))
+    flash("something broke")
+    return redirect(url_for("home"))
+
+@app.route("/logout")
+def logout():
+    if "username" in session:
+        username = session["username"]
+        logout_time = datetime.now()
+        update_log = update(logs).where(logs.c.users_usrnm == username).values(logout=logout_time)
+        conn = engine.connect()
+        conn.execute(update_log)
+        session.clear()
+        flash("logged out")
+        return redirect(url_for("login"))
+    else:
+        flash("login first before logging out you dummy")
         return redirect(url_for("login"))
     flash("something broke")
     return redirect(url_for("login"))
