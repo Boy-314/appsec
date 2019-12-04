@@ -3,6 +3,7 @@
   <h4>login history</h4>
   <form action="" method="POST" id="userid">
     user to check logs <input type="text" name="loginhistory">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <input type="submit" value="run">
   </form>
 {% endblock content %}

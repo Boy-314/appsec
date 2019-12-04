@@ -3,6 +3,7 @@
   {% if loggedin == "admin" %}
     <form action="" id="userquery" method="POST">
       admin query <input type="text" name="userquery"><br>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <input type="submit" value="run">
     </form>
   {% endif %}

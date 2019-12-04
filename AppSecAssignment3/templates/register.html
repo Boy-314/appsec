@@ -14,6 +14,7 @@
     username <input type="text" id="uname" name="username"><br>
     password <input type="password" id="pword" name="password"><br>
     2fa <input type="number" id="2fa" name="twofactor"><br>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <input type="submit" value="register">
   </form>
 {% endblock content %}
