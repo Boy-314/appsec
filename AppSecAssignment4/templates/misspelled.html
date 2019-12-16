@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block content %}
+  <p id="textout"><b>given text</b>: {{ text }}</p>
+  <p id="misspelled"><b>misspelled</b>: {{ misspelled }}</p>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+{% endblock content %}

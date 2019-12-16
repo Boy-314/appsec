@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block content %}
+  <form action="" method="POST">
+    text to spell check <input type="text" id="inputtext" name="spellcheck"><br>
+    <input type="submit" value="run">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+  </form>
+{% endblock content %}

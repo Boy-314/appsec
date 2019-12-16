@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+  {% if loggedin == "admin" %}
+    <form action="" id="userquery" method="POST">
+      admin query <input type="text" name="userquery"><br>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <input type="submit" value="run">
+    </form>
+  {% endif %}
+  <h4>spell-check history:</h4><br>
+  <p id=numqueries>total queries: {{ querycount }}</p>
+  {% with qcount = querycount %}
+    {% for i in range(qcount) %}
+      <li id={{ querynums[i] }}><a href="{{ url_for("query", id=querynums[i], loggedin=loggedin)}}">{{ querytexts[i] }}</li>
+    {% endfor %}
+  {% endwith %}
+  <p id="textout">{{ text }}</p>
+{% endblock content %}
