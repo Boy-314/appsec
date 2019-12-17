@@ -1,3 +1,4 @@
+from redis import Redis
 from flask import Flask, render_template, url_for, flash, redirect, request, session, escape
 from flask_bcrypt import Bcrypt
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, UniqueConstraint, ForeignKey, func, update
@@ -31,6 +32,7 @@ logs = Table(
 )
 
 app = Flask(__name__)
+redis = Redis(host='redis', port=6379)
 app.config['SECRET_KEY'] = os.urandom(16)
 bcrypt = Bcrypt(app)
 csrf = CSRFProtect(app)
@@ -309,4 +311,4 @@ def logout():
     return redirect(url_for("login"))
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="localhost", port=8080, debug=True)
